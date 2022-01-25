@@ -1,0 +1,2 @@
+if(applex[i] > applex[i-1] && applex[i] < applex[i-1]){
+}

@@ -1,0 +1,97 @@
+<html>
+<style>
+canvas{
+	border: 2px solid #000000;
+	position: relative;
+	}
+html{
+	text-align: center;
+	}
+.right{
+	padding-left: 200px;
+}
+.left{
+	padding-right: 200px;
+}
+</style>
+<body>
+<canvas id = "game" height = "480" width = "650"></canvas>
+<div class = "controls">
+<img class = "left" src = "left.png" width = "100" height = "50" onclick = "left()"></img>
+<img class = "right"src = "right.png" width = "100" height = "50" onclick = "right()"></img>
+</div>
+<script>
+x = 0;
+y = 320;
+var on = 1;
+var whimper = new Audio("whimper.mp3");
+var music = new Audio("music.mp3");
+var musicloop = setInterval(function(){music.play();}, 55000);
+music.play();
+firsty1 = Math.random() * 100;
+firsty2 = Math.random() * 100;
+var locationy = [-100,-400,0,-250];
+var locationx = [0,200,400,500];
+var score = 0;
+function main(){
+	draw("background.jpg",0,0);
+	draw("doge.png",x,y);
+	for(i = 0; i < 4; i++){
+		draw("apple.png",locationx[i],locationy[i]);
+		locationy[i] = locationy[i]+10;
+		if(locationx[i] > x-30 && locationx[i] < x+140){
+			if(locationy[i] > y-20 && locationy[i] < y+80){
+				whimper.play();
+				music.pause();
+				clearInterval(musicloop);
+				alert("Ouch. KO. So apple. Score: "+score);
+				playagain();
+			}
+		}
+		if(locationy[i] === 480){
+			locationx[i] = Math.floor((Math.random() * 6) + 1)*100;
+			if(locationx[i] === locationx[i-1]){
+				locationx[i] = Math.floor((Math.random() * 6) + 1)*100;
+			}
+			locationy[i] = -20;
+		}
+	}
+	score = score+1;
+}
+function draw(image, x, y){
+	var canvas = document.getElementById("game");
+	var context = canvas.getContext("2d");
+	var imageObj = new Image();
+	imageObj.onload = function() {
+	context.drawImage(imageObj, x, y);
+	};
+	imageObj.src = image;
+}
+draw("doge.png",x,y);
+function left(){
+	
+	draw("doge.png", x-50, y);
+	x = x-50
+	if(x < -20){
+		x = -20;
+	}
+}
+function right(){
+	draw("doge.png", x+50, y);
+	x = x+50
+	if(x > 500){
+		x = 500;
+	}
+}
+function playagain(){
+	var play = confirm("??Again. Play Doge. Wow??");
+	if(play === true){
+		location.reload();
+	}else if(play === false){
+		clearInterval(mainint);
+		on = 0;
+	}
+}
+var mainint = setInterval(function(){main()}, 30);
+</script>
+</html>

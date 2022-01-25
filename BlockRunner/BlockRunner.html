@@ -1,0 +1,197 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="style.css"/>
+	<title>Block Runner</title>
+</head>
+<h1>Block Runner</h1>
+<canvas id = "game" height = "400" width = "599" style = "border: 5px blue solid">error</canvas>
+<script>
+var game = {
+	height: 400,
+	width: 600, 
+	block: 40, //choose any block size where canvas' height/block size = whole number. DONT make it over 50 (default is 40)//
+	gravity: 1.6,
+	difficulty: 0,
+	clock: 30,
+	pause: false
+}
+var coin = {
+	bonus: 100,
+	size: 20,
+}
+var splash = new Audio("splash.mp3");
+var music = new Audio("music.mp3");
+var coin = new Audio("coin.mp3");
+var player = {
+	view: 0,
+	x: game.block*6, //initial values for player, adjust to thoust liking//
+	y: game.height-4*game.block,
+	vx: 0,
+	vy: 0,
+	score: 0
+}
+var cloud = {
+	x: game.width,
+	y: (Math.random()*90)+20,
+	width: Math.floor((Math.random()*4)+2)*game.block,
+	speed: 1.5 //default 1.5//
+}
+var pColorOptions = ["Orange", "Red", "Black", "Grey", "Blue", "Green", "Purple"]; //possible colours the player can be//
+var level = [
+	[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	[0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,1],
+	[0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,1,1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,1,1],
+	[1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,1,0,0,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,1,0,1,0,1,0,2,1,0,0,0,0,0,0,0,1,1,1,1],
+	[1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,1,0,0,1,0,0,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,1,0,1,0,1,0,1,1,0,0,0,0,0,0,0,1,1,1,1]
+]
+function checkKey(e) { 
+	e = e || window.event;
+	if(e.keyCode == '37') {
+		player.vx = game.block/-5; //all speed values adjusted for games block size #fresh//
+	}else if(e.keyCode == '39') {
+		player.vx = game.block/5;
+    }else if(e.keyCode == '38'){
+		if(player.vy == game.gravity || player.vy == 0){ //I have to do this because in js you can't checkKey at a specific time//
+			player.vy = game.block/-2.7;
+		}
+	}else if(e.keyCode == '27'){
+		if(game.pause == false){
+			game.pause = true;
+		}else{
+			game.pause = false;
+		}
+	}
+}
+function checkKeyUp(e) { 
+	e = e || window.event;
+	if(e.keyCode == '37') {
+		player.vx = 0; //all speed values adjusted for games block size #fresh//
+	}else if(e.keyCode == '39') {
+		player.vx = 0;
+    }
+}
+function draw(color, x, y, w, h){
+	context.fillStyle = color;
+	context.fillRect(x,y,w,h);
+}
+function winlose(){
+	if(player.x-player.view < 0 || player.y > game.height){ //checking for losers//
+		music.pause();
+		if(player.y+game.block > game.height-game.block){ //checking if you lost due to falling or being slow//
+			splash.play();
+			alert("Game Over! You fell!");
+		}else{
+			alert("Game Over! You weren't quick enough!");
+		}
+		alert("Score: "+player.score);
+		var again = confirm("Do you want to try again");
+		if(again == true){
+			player.view = 0;
+			player.x = game.block*6;
+			player.y = game.height-game.block*5;
+			player.vy = 0;
+			player.vx = 0;
+			player.score = 0;
+			music.currentTime = 0;
+			music.play();
+		}else{
+			clearInterval(gameClock);
+		}
+	}else if(player.x+game.block > game.block*level[0].length-game.block){
+		clearInterval(gameClock);
+		alert("Level complete! You made it to land!");
+		player.score += 50;
+		alert("Score: "+player.score);
+		draw("Black", 0, 0, game.width, game.height);
+		context.font = "32pt simple";
+		context.fillStyle = "white";
+		context.textAlign = "center";
+		context.fillText("You WIN!", game.width/2, 70);
+		context.fillText("Created by Robert Sheiman", game.width/2, 140);
+		context.fillText("Thanks for playing", game.width/2, 210);
+	}
+}
+function main(){ //order of code in main() is: add velocities and to moving stuff, check for collisions, check for winners or losers, then draw everything//
+	game.pause = false;
+	player.x += player.vx;
+	player.y += player.vy;
+	if(cloud.x+cloud.width <= 0){
+		cloud.y = (Math.random()*90)+20; //again, ill change this later//
+		cloud.width = Math.floor((Math.random()*4)+2)*game.block; //new cloud stuff bc clouds are fucking pretty//
+		cloud.x = game.width;
+	}else{
+		cloud.x -= cloud.speed;
+	}
+	player.view += game.difficulty;
+	if(player.x-player.view > game.width - 4*game.block){
+		player.view += game.difficulty;
+	}
+	player.score ++;
+	player.vy += game.gravity;
+	for(i = 0; i < level.length; i++){ //need 2 for loops bc I need 2 counting variables//
+		for(g = Math.floor(player.view/game.block); g < ((player.view+game.width)/game.block); g++){ 
+			if(level[i][g] == 1){   //code for collision with grass//
+				blockX = g*game.block;
+				blockY = i*game.block+(game.height-(level.length*game.block));
+				if(player.x+game.block > blockX && player.x < blockX+game.block && player.y+game.block > blockY && player.y < blockY+game.block){
+					var xdist = Math.abs((player.x+0.5*game.block)-(blockX+0.5*game.block)); 
+					var ydist = Math.abs((player.y+0.5*game.block)-(blockY+0.5*game.block)); //calculating vectors between block and player//
+					if(ydist > xdist){ //using vectors to determine if the collision is horizontal or vertical//
+						player.vy = 0;
+						player.y = Math.round((player.y-player.vy)/game.block)*game.block; //rounds player.y to nearest block//
+					}else{
+						player.x = Math.round(player.x/game.block)*game.block; //rounds player.x to nearest block//
+					}
+				}
+			}else if(level[i][g] == 2){
+				blockX = g*game.block+game.block/4;
+				blockY = i*game.block+(game.height-(level.length*game.block));
+				if(player.x < blockX + game.block/2 && player.x + game.block > blockX && player.y < blockY + game.block/2 && player.y + game.block > blockY){
+					player.score += 100;
+					coin.play();
+					level[i][g] = 0;
+				}
+			}
+		}
+	}
+	draw("#A9F5F2", 0, 0, game.width, game.height); //draws sky background//
+	draw("#F4FA58", 10, 10, 70, 70); //x,y,width,height of sun, keeping it constant looks cool, trust me//
+	draw("#FFFFFF", cloud.x, cloud.y, cloud.width, game.block); //draw cloud//
+	draw(pColor, player.x-player.view, player.y, game.block, game.block); //draw player//
+	draw("#01A9DB", 0, game.height-game.block, game.width, game.block); //draw water//
+	for(i = 0; i < level.length; i++){
+		for(g = Math.floor(player.view/game.block); g < ((player.view+game.width)/game.block); g++){ //g has complicated parameters so only blocks in the frame are processed//
+			if(level[i][g] == 1){
+				draw("#04B404", g*game.block-player.view, i*game.block+(game.height-(level.length*game.block)), game.block, game.block); //draw grass+coin
+			}else if(level[i][g] == 2){
+				draw("gold", g*game.block-player.view+game.block/4, i*game.block+(game.height-(level.length*game.block)), game.block/2, game.block/2);
+			}
+		}
+	}
+	if(player.view+game.width > level[0].length*game.block){
+		draw("#04B404", level[0].length*game.block-player.view, game.height-game.block*4, game.width, game.height);
+	}
+	winlose();
+}
+//below is all the code for initiating the game//
+game.difficulty = Math.round(game.block/9);
+game.gravity = game.block/25; //adjusting gravity for block size variable//
+var pColor = pColorOptions[Math.floor(Math.random()*pColorOptions.length)]; //choose random player color//
+var canvas = document.getElementById("game"); //get the canvas element//
+var context = canvas.getContext("2d");
+document.onkeydown = checkKey; //check for keystroke//
+document.onkeyup = checkKeyUp;
+music.play();
+var gameClock = setInterval(function(){
+	if(game.pause == false){
+		main();
+	}else{
+		context.font = "40pt simple";
+		context.fillText("Paused", 30, 60);
+	}
+}, game.clock); //main game clock//
+</script>
+</canvas>
+<p>Use arrow keys to move and jump, and escape to pause</p>
+</html>

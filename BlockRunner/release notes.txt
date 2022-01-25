@@ -1,0 +1,12 @@
+"2D Parkour" by Robert Sheiman
+V1.0
+2D Parkour created
+V2.0
+switched from images to plain rectangles, added clouds. also added water to fall into.
+and a splash sound for falling into water. Players are now a random color every game.
+Works in IE now. Fixed multiple issues with collisions. Other Bug fixes.
+V3.0
+I renamed it Block Runner. deal widit. Added pausing. Added soundtrack.
+Added other pretty html elements. Added ending credits. Minor bug fixes.
+V3.1
+yeay, fun lil coins that give you 100 points! 

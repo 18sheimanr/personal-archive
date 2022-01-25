@@ -1,0 +1,104 @@
+<html>
+<body>
+<canvas width = "650" height = "500" id = "canvas" style = "border: 5px solid #000000;">error</canvas>
+<script>
+document.onkeydown = checkKeydown;
+var on = 1;
+var bounce = new Audio("bounce.mp3");
+var ball = {
+	x: 100,
+	y: 100,
+	velocity: 15,
+	velocityh: 0,
+	hpower: 40,
+	vpower: 40,
+	image: loadImage("ball.png")
+}
+var shadow = loadImage("shadow.png");
+score = 0;
+cwidth = 650;
+cheight = 500;
+gravity = 3;
+bouncelossh = 4;
+friction = 1;
+deccel = 0.2;
+bouncecap = 25;
+bouncecaph = 15;
+var context = document.getElementById("canvas").getContext("2d");
+function checkKeydown(e) {
+	if(on === 1){
+		e = e || window.event;
+		if (e.keyCode == '65') {
+			ball.velocityh = ball.hpower*-1;
+		}else if (e.keyCode == '68') {
+			ball.velocityh = ball.hpower;
+		}else if(e.keyCode == '87'){
+			ball.velocity = ball.vpower*-1;
+    		}
+	}
+}
+function loadImage(image){
+	var imageObj = new Image();
+	imageObj.src = image;
+	return imageObj;
+}
+function draw(image, x, y){
+	context.drawImage(image, x, y);
+}
+function main(){
+	context.clearRect(0,0,650,500);
+	draw(shadow,ball.x+50, 447);
+	draw(ball.image, ball.x, ball.y);
+	ball.y = ball.y + ball.velocity;
+	ball.velocity = ball.velocity + gravity;
+	ball.x = ball.x + ball.velocityh;
+	if(Math.abs(ball.velocityh) < 2){
+		ball.velocityh = 0;
+	}
+	if(ball.velocityh > 0){
+		if(ball.y+240 > 479){
+			ball.velocityh = ball.velocityh-friction;
+		}else{
+			ball.velocityh = ball.velocityh-deccel;
+		}
+	}else if(ball.velocityh < 0){
+		if(ball.y+240 > 479){
+			ball.velocityh = ball.velocityh+friction;
+		}else{
+			ball.velocityh = ball.velocityh+deccel;
+		}
+	}
+	if(ball.y+240 > 480){
+		if(ball.velocity > bouncecap){
+			bounce.load();
+			bounce.play();
+			score += ball.velocity;
+			document.getElementById("score").innerHTML = "Score: "+score;
+		}
+		ball.velocity = (ball.velocity*-1)+(gravity*6);
+		ball.y = 240;
+	}
+	if(ball.x < 0){
+		ball.velocityh = (ball.velocityh*-1)-bouncelossh;
+		ball.x = 0;
+		if(ball.velocityh > bouncecaph){
+			bounce.load();
+			bounce.play();	
+		}
+	}else if(ball.x > 410){
+		ball.velocityh = (ball.velocityh*-1)+bouncelossh;
+		ball.x = 410;
+		if(ball.velocityh < bouncecaph){
+			bounce.load();
+			bounce.play();
+		}
+	}
+	if(ball.y < -700){
+		ball.y = -700;
+	}
+}
+var maintint = setInterval(function(){main();}, 40);
+</script>
+<p id = "score">Score: 0</p>
+</body>
+</html>

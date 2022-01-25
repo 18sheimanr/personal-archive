@@ -1,0 +1,94 @@
+<html>
+<style>
+canvas{
+	border: 2px solid #000000;
+	}
+html{
+	text-align: center;
+	}
+</style>
+<body>
+<canvas id = "game" height = "480" width = "650"/>
+<script>
+var on = 1;
+var whimper = new Audio("whimper.mp3");
+var music = new Audio("music.mp3");
+var musicloop = setInterval(function(){music.play();}, 55000);
+music.play();
+var locationy = [-900,-600,0,-300];
+var locationx = [0,200,400,500];
+document.onkeydown = checkKey;
+function checkKey(e) {
+	if(on === 1){
+		e = e || window.event;
+		if (e.keyCode == '37') {
+			left();
+		}else if (e.keyCode == '39') {
+			right();
+    		}
+	}
+}
+var score = 0;
+function draw(image, x, y){
+	var canvas = document.getElementById("game");
+	var context = canvas.getContext("2d");
+	var imageObj = new Image();
+	imageObj.onload = function() {
+	context.drawImage(imageObj, x, y);
+	};
+	imageObj.src = image;
+}
+x = 0;
+y = 320;
+draw("doge.png",x,y);
+function left(){
+	draw("doge.png", x-50, y);
+	x = x-50
+	if(x < -20){
+		x = -20;
+	}
+}
+function right(){
+	draw("doge.png", x+50, y);
+	x = x+50
+	if(x > 500){
+		x = 500;
+	}
+}
+function playagain(){
+	var play = confirm("??Again. Play Doge. Wow??");
+	if(play === true){
+		location.reload();
+	}else if(play === false){
+		clearInterval(mainint);
+		on = 0;
+	}
+}
+function main(){
+	draw("background.jpg",0,0);
+	draw("doge.png",x,y);
+	for(i = 0; i < 4; i++){
+		draw("apple.png",locationx[i],locationy[i]);
+		locationy[i] = locationy[i]+10;
+		if(locationx[i] > x-30 && locationx[i] < x+140){
+			if(locationy[i] > y-20 && locationy[i] < y+80){
+				whimper.play();
+				music.pause();
+				clearInterval(musicloop);
+				alert("Ouch. KO. So apple. Score: "+score);
+				playagain();
+			}
+		}
+		if(locationy[i] > 470){
+			locationx[i] = Math.floor((Math.random() * 6) + 1)*100;
+			if(locationx[i] === locationx[i-1]){
+				locationx[i] = Math.floor((Math.random() * 6) + 1)*100;
+			}
+			locationy[i] = -20;
+		}
+	}
+	score = score+1;
+}
+var mainint = setInterval(function(){main()}, 30);
+</script>
+</html>
